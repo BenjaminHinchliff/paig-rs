@@ -1,0 +1,20 @@
+num    = @{ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT*)? }
+id     = @{ sym+ }
+sym    =  { !("(" | ")" | "[" | "]" | "{" | "}" | "\"" | "," | "`" | ";" | "#" | "|" | "\\" | WHITESPACE) ~ ANY }
+string = ${ "\"" ~ inner ~ "\"" }
+inner  = @{ char* }
+char   =  {
+    !("\"" | "\\") ~ ANY
+  | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+  | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
+open   = _{ "{" | "[" | "(" }
+close  = _{ "}" | "]" | ")" }
+if     =  { expr ~ "?" ~ expr ~ "else:" ~ expr }
+params = { open ~ id* ~ close }
+blam   =  { "blam" ~ params ~ expr }
+apply  =  { expr* }
+sexp   = _{ open ~ (if | blam | apply) ~ close }
+expr   =  _{ num | id | string | sexp }
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
